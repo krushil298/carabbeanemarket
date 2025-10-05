@@ -1,0 +1,340 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Caribbean Pattern Background */
+.caribbean-pattern {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 127, 80, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(0, 128, 128, 0.05) 0%, transparent 50%);
+}
+
+/* Caribbean Gradient Backgrounds */
+.caribbean-bg-light {
+  background: linear-gradient(135deg, #e0f7fa 0%, #fff3e0 50%, #fce4ec 100%);
+}
+
+.caribbean-bg-medium {
+  background: linear-gradient(135deg, #b2ebf2 0%, #ffe0b2 50%, #f8bbd9 100%);
+}
+
+.caribbean-bg-warm {
+  background: linear-gradient(135deg, #4dd0e1 0%, #ffb74d 50%, #f06292 100%);
+}
+
+.caribbean-sunset {
+  background: linear-gradient(135deg, #ff7043 0%, #ffa726 50%, #42a5f5 100%);
+}
+
+.caribbean-ocean {
+  background: linear-gradient(135deg, #26c6da 0%, #29b6f6 50%, #5c6bc0 100%);
+}
+
+.caribbean-sand {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 50%, #ffe082 100%);
+}
+
+/* Caribbean Artwork Hero Background */
+.caribbean-hero-bg {
+  background: linear-gradient(135deg, 
+    #00bcd4 0%,     /* Caribbean turquoise */
+    #26c6da 25%,    /* Light cyan */
+    #ff7043 50%,    /* Coral orange */
+    #ffa726 75%,    /* Sunset orange */
+    #42a5f5 100%    /* Ocean blue */
+  );
+  min-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .caribbean-hero-bg {
+    min-height: 400px;
+  }
+}
+
+/* Enhanced Caribbean Hero Section */
+.caribbean-hero-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.caribbean-hero-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 193, 7, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 127, 80, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(0, 188, 212, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+  animation: float-bubbles 20s ease-in-out infinite;
+}
+
+.caribbean-hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+@keyframes float-bubbles {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+.glass-search-form {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.tropical-gradient {
+  background: linear-gradient(135deg, #008080 0%, #ff7f50 50%, #ffd700 100%);
+}
+
+.coral-gradient {
+  background: linear-gradient(135deg, #ff7f50 0%, #ff6b6b 100%);
+}
+
+.teal-gradient {
+  background: linear-gradient(135deg, #008080 0%, #20b2aa 100%);
+}
+
+/* Island Badge Styles */
+.island-badge {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+/* Verification Badge Animation */
+.verification-pulse {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* Tropical Button Styles */
+.btn-tropical {
+  background: linear-gradient(135deg, #008080 0%, #20b2aa 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-tropical:hover {
+  background: linear-gradient(135deg, #006666 0%, #1a9999 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 128, 128, 0.3);
+}
+
+.btn-coral {
+  background: linear-gradient(135deg, #ff7f50 0%, #ff6b6b 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-coral:hover {
+  background: linear-gradient(135deg, #ff6347 0%, #ff5555 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 127, 80, 0.3);
+}
+
+/* Trending Badge */
+.trending-badge {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Local Gem Badge */
+.local-gem-badge {
+  background: linear-gradient(135deg, #ff7f50 0%, #ff6b6b 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.local-gem-badge::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+/* Accessibility Styles */
+.color-blind-mode {
+  filter: grayscale(0.3) contrast(1.2);
+}
+
+.high-contrast {
+  filter: contrast(1.5) brightness(1.1);
+}
+
+.large-text {
+  font-size: 1.125rem !important;
+}
+
+.large-text h1 {
+  font-size: 2.5rem !important;
+}
+
+.large-text h2 {
+  font-size: 2rem !important;
+}
+
+.large-text h3 {
+  font-size: 1.75rem !important;
+}
+
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Custom Calendar Styles */
+.react-calendar {
+  width: 100%;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-family: inherit;
+}
+
+.dark .react-calendar {
+  background: #374151;
+  border-color: #4b5563;
+  color: white;
+}
+
+.react-calendar__tile {
+  background: none;
+  border: none;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 0.25rem;
+}
+
+.react-calendar__tile:hover {
+  background-color: #f3f4f6;
+}
+
+.dark .react-calendar__tile:hover {
+  background-color: #4b5563;
+}
+
+.react-calendar__tile--active {
+  background-color: #008080 !important;
+  color: white !important;
+}
+
+.react-calendar__tile--now {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.dark .react-calendar__tile--now {
+  background-color: #451a03;
+  color: #fbbf24;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #008080;
+  outline-offset: 2px;
+}
+
+/* Loading animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 128, 128, 0.15);
+}
+
+/* Offer button styles */
+.offer-button {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #8b5a00;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.offer-button:hover {
+  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
