@@ -29,6 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -86,10 +91,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    if (!supabase) {
+      console.error('Supabase not configured');
+      return false;
+    }
+
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
       });
 
       if (error) {
@@ -112,6 +122,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (userData: Partial<User> & { password: string }): Promise<{ success: boolean; userId?: string; error?: string }> => {
+    if (!supabase) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+
     try {
       const { email, password, username, location, phone, bio, profilePicture } = userData;
 
