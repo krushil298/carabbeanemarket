@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
 import Layout from '../components/Layout/Layout';
 import ImageUpload from '../components/Media/ImageUpload';
 import ProductVariations from '../components/Products/ProductVariations';
 import { useAuth } from '../context/AuthContext';
-import { useProducts } from '../context/ProductContext';
 import { categories, caribbeanLocations, carMakes, carModels, carYears, carPartsCategories, serviceCategories, propertyTypes } from '../data/mockData';
 import { ProductVariation } from '../types';
+import { createListing } from '../services/listingService';
+import { uploadMultipleImages, uploadMultipleVideos } from '../services/mediaService';
 
 const AddProductPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  const { addProduct } = useProducts();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -55,10 +56,12 @@ const AddProductPage: React.FC = () => {
     certifications: ''
   });
   
-  const [images, setImages] = useState<string[]>([]);
-  const [videos, setVideos] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [variations, setVariations] = useState<ProductVariation[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -75,70 +78,126 @@ const AddProductPage: React.FC = () => {
     }
   };
 
+  const handleFilesChange = (images: File[], videos: File[]) => {
+    setImageFiles(images);
+    setVideoFiles(videos);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
+    setUploadProgress(0);
+
+    if (!user?.id) {
+      setError('You must be logged in to create a listing');
+      setLoading(false);
+      return;
+    }
+
+    if (imageFiles.length === 0) {
+      setError('Please add at least one image');
+      setLoading(false);
+      return;
+    }
 
     try {
-      const productData = {
+      setUploadProgress(10);
+
+      const { urls: imageUrls, errors: imageErrors } = await uploadMultipleImages(
+        imageFiles,
+        user.id,
+        (progress) => setUploadProgress(10 + progress * 0.5)
+      );
+
+      if (imageErrors.length > 0) {
+        throw new Error(`Failed to upload ${imageErrors.length} image(s)`);
+      }
+
+      setUploadProgress(70);
+
+      let videoUrls: string[] = [];
+      if (videoFiles.length > 0) {
+        const { urls: vUrls, errors: videoErrors } = await uploadMultipleVideos(
+          videoFiles,
+          user.id,
+          (progress) => setUploadProgress(70 + progress * 0.2)
+        );
+
+        if (videoErrors.length > 0) {
+          console.warn(`Failed to upload ${videoErrors.length} video(s)`);
+        }
+
+        videoUrls = vUrls;
+      }
+
+      setUploadProgress(90);
+
+      const listingData = {
+        user_id: user.id,
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
-        currency: 'USD',
         category: formData.category,
-        condition: formData.condition as any,
-        location: formData.location,
-        images,
-        videos: videos.length > 0 ? videos : undefined,
-        inventory: parseInt(formData.inventory),
-        variations: variations.length > 0 ? variations : undefined,
+        condition: formData.condition,
+        country: formData.location,
+        parish: '',
+        images: imageUrls,
+        videos: videoUrls.length > 0 ? videoUrls : undefined,
+        stock_quantity: parseInt(formData.inventory),
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        negotiable: formData.negotiable,
-        negotiablePrice: formData.negotiablePrice ? parseFloat(formData.negotiablePrice) : undefined,
-        views: 0,
-        salesCount: 0,
-        trending: false,
-        localGem: Math.random() > 0.7, // 30% chance of being a local gem
-        
-        // Category-specific fields
-        ...(formData.category.startsWith('Real Estate') && {
-          propertyType: formData.propertyType,
-          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
-          bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : undefined,
-          squareFeet: formData.squareFeet ? parseInt(formData.squareFeet) : undefined,
-          amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean)
-        }),
-        
-        ...(formData.category === 'Automotive - Cars' && {
-          make: formData.make,
-          model: formData.model,
-          year: formData.year ? parseInt(formData.year) : undefined,
-          mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
-          fuelType: formData.fuelType,
-          transmission: formData.transmission
-        }),
-        
-        ...(formData.category === 'Automotive - Parts' && {
-          partName: formData.partName,
-          partCategory: formData.partCategory,
-          compatibleMake: formData.compatibleMake,
-          compatibleModel: formData.compatibleModel,
-          compatibleYear: formData.compatibleYear ? parseInt(formData.compatibleYear) : undefined
-        }),
-        
-        ...(formData.category === 'Services' && {
-          serviceType: formData.serviceType,
-          availability: formData.availability,
-          hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : undefined,
-          skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-          certifications: formData.certifications.split(',').map(c => c.trim()).filter(Boolean)
-        })
+        is_negotiable: formData.negotiable,
+        metadata: {
+          variations: variations.length > 0 ? variations : undefined,
+          negotiablePrice: formData.negotiablePrice ? parseFloat(formData.negotiablePrice) : undefined,
+
+          ...(formData.category.startsWith('Real Estate') && {
+            propertyType: formData.propertyType,
+            bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
+            bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : undefined,
+            squareFeet: formData.squareFeet ? parseInt(formData.squareFeet) : undefined,
+            amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean)
+          }),
+
+          ...(formData.category === 'Automotive - Cars' && {
+            make: formData.make,
+            model: formData.model,
+            year: formData.year ? parseInt(formData.year) : undefined,
+            mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
+            fuelType: formData.fuelType,
+            transmission: formData.transmission
+          }),
+
+          ...(formData.category === 'Automotive - Parts' && {
+            partName: formData.partName,
+            partCategory: formData.partCategory,
+            compatibleMake: formData.compatibleMake,
+            compatibleModel: formData.compatibleModel,
+            compatibleYear: formData.compatibleYear ? parseInt(formData.compatibleYear) : undefined
+          }),
+
+          ...(formData.category === 'Services' && {
+            serviceType: formData.serviceType,
+            availability: formData.availability,
+            hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : undefined,
+            skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
+            certifications: formData.certifications.split(',').map(c => c.trim()).filter(Boolean)
+          })
+        },
+        status: 'pending' as const
       };
 
-      await addProduct(productData);
-      navigate('/profile');
+      const { data, error: createError } = await createListing(listingData);
+
+      if (createError || !data) {
+        throw new Error(createError?.message || 'Failed to create listing');
+      }
+
+      setUploadProgress(100);
+      navigate('/profile?tab=listings');
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error('Error creating listing:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create listing. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -675,9 +734,28 @@ const AddProductPage: React.FC = () => {
               <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">
                 Photos & Videos
               </h2>
+              {error && (
+                <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-400 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+              {loading && uploadProgress > 0 && (
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress.toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-cyan-500 to-teal-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
               <ImageUpload
-                onImagesChange={setImages}
-                onVideosChange={setVideos}
+                onFilesChange={handleFilesChange}
                 allowVideos={true}
                 maxImages={10}
                 maxVideos={3}
