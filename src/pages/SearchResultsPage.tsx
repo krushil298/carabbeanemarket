@@ -154,11 +154,10 @@ const SearchResultsPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Filters - Sidebar */}
           <div className="md:col-span-1">
-            <ProductFilters 
+            <ProductFilters
               onFilterChange={applyFilters}
               initialFilters={{
                 category: initialCategory,
-                location: initialLocation,
                 location: initialLocation,
                 minPrice: initialMinPrice,
                 maxPrice: initialMaxPrice,
