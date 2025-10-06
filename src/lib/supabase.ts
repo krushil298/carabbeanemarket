@@ -1,13 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-/**
-  Supabase client (browser-side)
-  Reads URL and anon key from Vite env. Do NOT hardcode secrets.
-*/
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
-// Validate that we have proper Supabase credentials (not placeholders)
 const isValidUrl = supabaseUrl && supabaseUrl.startsWith('https://') && supabaseUrl.includes('.supabase.co')
 const isValidKey = supabaseAnonKey && supabaseAnonKey.startsWith('eyJ')
 
@@ -18,7 +13,68 @@ if (!isValidUrl || !isValidKey) {
   console.log('VITE_SUPABASE_ANON_KEY=your-anon-key')
 }
 
-// Only create client if we have valid credentials (not placeholders)
-export const supabase = isValidUrl && isValidKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
+export const supabase: SupabaseClient | null = isValidUrl && isValidKey
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    })
   : null
+
+export const STORAGE_BUCKETS = {
+  LISTING_IMAGES: 'listing-images',
+  LISTING_VIDEOS: 'listing-videos',
+  EVENT_IMAGES: 'event-images',
+  AVATARS: 'avatars'
+} as const
+
+export function getPublicUrl(bucket: string, path: string): string {
+  if (!supabase) return ''
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+  return data.publicUrl
+}
+
+export async function uploadFile(
+  bucket: string,
+  path: string,
+  file: File
+): Promise<{ url: string | null; error: Error | null }> {
+  if (!supabase) {
+    return { url: null, error: new Error('Supabase client not initialized') }
+  }
+
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) throw error
+
+    const url = getPublicUrl(bucket, data.path)
+    return { url, error: null }
+  } catch (error) {
+    return { url: null, error: error as Error }
+  }
+}
+
+export async function deleteFile(
+  bucket: string,
+  path: string
+): Promise<{ error: Error | null }> {
+  if (!supabase) {
+    return { error: new Error('Supabase client not initialized') }
+  }
+
+  try {
+    const { error } = await supabase.storage.from(bucket).remove([path])
+    if (error) throw error
+    return { error: null }
+  } catch (error) {
+    return { error: error as Error }
+  }
+}
