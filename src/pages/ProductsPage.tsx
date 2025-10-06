@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Grid, List, Filter, AlertCircle } from 'lucide-react';
+import { Grid2x2 as Grid, List, Filter, AlertCircle } from 'lucide-react';
 import Layout from '../components/Layout/Layout';
 import ProductCard from '../components/Products/ProductCard';
 import ProductFilters from '../components/Products/ProductFilters';
