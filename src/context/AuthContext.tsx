@@ -29,11 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -91,11 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    if (!supabase) {
-      console.error('Supabase not configured');
-      return false;
-    }
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
@@ -122,10 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (userData: Partial<User> & { password: string }): Promise<{ success: boolean; userId?: string; error?: string }> => {
-    if (!supabase) {
-      return { success: false, error: 'Supabase not configured' };
-    }
-
     try {
       const { email, password, username, location, phone, bio, profilePicture } = userData;
 
@@ -177,10 +163,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithOTP = async (email: string, code: string): Promise<{ success: boolean; error?: string }> => {
-    if (!supabase) {
-      return { success: false, error: 'Supabase not configured' };
-    }
-
     try {
       const verifyResult = await verifyOTP(email, code, 'login');
 
@@ -239,10 +221,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetPassword = async (email: string, newPassword: string, code: string): Promise<{ success: boolean; error?: string }> => {
-    if (!supabase) {
-      return { success: false, error: 'Supabase not configured' };
-    }
-
     try {
       const verifyResult = await verifyOTP(email, code, 'reset');
 
@@ -277,12 +255,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async (): Promise<void> => {
-    if (!supabase) {
-      setCurrentUser(null);
-      setIsAuthenticated(false);
-      return;
-    }
-
     try {
       await supabase.auth.signOut();
       setCurrentUser(null);
@@ -293,7 +265,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUserProfile = async (userData: Partial<Profile>): Promise<boolean> => {
-    if (!supabase || !currentUser) {
+    if (!currentUser) {
       return false;
     }
 
